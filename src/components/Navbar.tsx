@@ -175,7 +175,7 @@ export default function Navbar() {
                     </div>
                   </div>
                   <Link
-                    to="/profile"
+                    to={`/channel/${user?.id}`}
                     onClick={() => setProfileOpen(false)}
                     className="block mt-3 text-center text-sm font-medium text-yt-blue hover:underline"
                   >
@@ -184,7 +184,7 @@ export default function Navbar() {
                 </div>
                 <div className="py-1">
                   {[
-                    { label: 'Your channel', to: '/profile' },
+                    { label: 'Your channel', to: `/channel/${user?.id}` },
                     { label: 'Upload video', to: '/upload' },
                     { label: 'Settings', to: '/profile' },
                   ].map((item) => (
