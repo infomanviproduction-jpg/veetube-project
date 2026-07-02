@@ -10,21 +10,18 @@ import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import Auth from './components/Auth';
 import { useEffect, useState } from 'react';
-import type { User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
 export default function App() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Current user check karo
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Login/Logout track karo
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -32,7 +29,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -41,12 +37,6 @@ export default function App() {
     );
   }
 
-  // Login nahi hai toh Auth page dikhao
-  if (!user) {
-    return <Auth />;
-  }
-
-  // Login ho gaya toh app dikhao
   return (
     <ThemeProvider>
       <UIProvider>
@@ -57,8 +47,9 @@ export default function App() {
               <Route path="/watch/:id" element={<Watch />} />
               <Route path="/search" element={<Search />} />
               <Route path="/channel/:id" element={<Channel />} />
-              <Route path="/upload" element={<Upload />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/upload" element={user ? <Upload /> : <Auth />} />
+              <Route path="/profile" element={user ? <Profile /> : <Auth />} />
+              <Route path="/login" element={<Auth />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
