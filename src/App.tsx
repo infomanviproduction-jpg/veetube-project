@@ -22,9 +22,11 @@ export default function App() {
       setLoading(false)
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null)
+      }
+    )
 
     return () => subscription.unsubscribe()
   }, [])
@@ -32,7 +34,7 @@ export default function App() {
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white text-xl">Loading...</p>
+        <p className="text-red-500 text-3xl font-bold">VeeTube</p>
       </div>
     )
   }
