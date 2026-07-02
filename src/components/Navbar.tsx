@@ -13,16 +13,24 @@ import {
 import Logo from './Logo';
 import { useTheme } from '../context/ThemeContext';
 import { useUI } from '../context/UIContext';
+import { supabase } from '../supabase';
 
 export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const { toggleSidebar, toggleMobileSidebar } = useUI();
   const navigate = useNavigate();
   const location = useLocation();
+  const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+  }, [])
 
   const isSearchPage = location.pathname === '/search';
 
@@ -54,7 +62,6 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-yt-bg dark:bg-yt-bg-dark flex items-center justify-between px-2 sm:px-4 gap-2 sm:gap-4">
-        {/* Left: menu + logo */}
         <div className={`flex items-center gap-1 sm:gap-4 ${mobileSearchOpen ? 'hidden sm:flex' : 'flex'}`}>
           <button
             onClick={() => {
@@ -69,7 +76,6 @@ export default function Navbar() {
           <Logo />
         </div>
 
-        {/* Center: search */}
         <div className={`flex-1 max-w-2xl ${mobileSearchOpen ? 'flex' : 'hidden sm:flex'} items-center`}>
           {mobileSearchOpen ? (
             <form onSubmit={handleSearch} className="flex items-center w-full gap-2">
@@ -122,7 +128,6 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Right: actions */}
         <div className={`flex items-center gap-1 sm:gap-2 ${mobileSearchOpen ? 'hidden' : 'flex'}`}>
           <button
             onClick={() => setMobileSearchOpen(true)}
@@ -160,18 +165,18 @@ export default function Navbar() {
               className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center text-white font-medium text-sm shrink-0"
               aria-label="Profile"
             >
-              V
+              {user?.email?.charAt(0).toUpperCase() || 'V'}
             </button>
             {profileOpen && (
               <div className="absolute right-0 top-12 w-64 bg-yt-bg dark:bg-yt-card-dark rounded-xl shadow-2xl border border-yt-border dark:border-yt-border-dark py-2 animate-slide-up overflow-hidden">
                 <div className="px-4 py-3 border-b border-yt-border dark:border-yt-border-dark">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center text-white font-medium">
-                      V
+                      {user?.email?.charAt(0).toUpperCase() || 'V'}
                     </div>
                     <div className="min-w-0">
-                      <div className="font-medium text-sm truncate">Vee User</div>
-                      <div className="text-xs text-yt-text-secondary dark:text-yt-text-secondary-dark truncate">@veeuser</div>
+                      <div className="font-medium text-sm truncate">{user?.email?.split('@')[0] || 'Vee User'}</div>
+                      <div className="text-xs text-yt-text-secondary dark:text-yt-text-secondary-dark truncate">{user?.email || '@veeuser'}</div>
                     </div>
                   </div>
                   <Link
