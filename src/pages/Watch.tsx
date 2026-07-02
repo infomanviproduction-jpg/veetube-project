@@ -3,28 +3,39 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../supabase'
 import { ThumbsUp, Share2, Download } from 'lucide-react'
 
+type Video = {
+  id: string
+  title?: string
+  description?: string
+  video_url?: string
+  likes?: number
+  views?: number
+  user_email?: string
+  created_at?: string
+}
+
 export default function Watch() {
   const { id } = useParams()
-  const [video, setVideo] = useState<any>(null)
+  const [video, setVideo] = useState<Video | null>(null)
   const [loading, setLoading] = useState(true)
   const [liked, setLiked] = useState(false)
 
   useEffect(() => {
-    fetchVideo()
+    const fetchVideo = async () => {
+      const { data } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('id', id)
+        .single()
+      if (data) setVideo(data)
+      setLoading(false)
+    }
+
+    if (id) fetchVideo()
   }, [id])
 
-  const fetchVideo = async () => {
-    const { data } = await supabase
-      .from('videos')
-      .select('*')
-      .eq('id', id)
-      .single()
-    if (data) setVideo(data)
-    setLoading(false)
-  }
-
   const handleLike = async () => {
-    if (liked) return
+    if (liked || !video || !id) return
     setLiked(true)
     await supabase
       .from('videos')
@@ -33,7 +44,8 @@ export default function Watch() {
     setVideo({ ...video, likes: (video.likes || 0) + 1 })
   }
 
-  const formatDate = (date: string) => {
+  const formatDate = (date?: string) => {
+    if (!date) return ''
     return new Date(date).toLocaleDateString('hi-IN', {
       year: 'numeric',
       month: 'long',

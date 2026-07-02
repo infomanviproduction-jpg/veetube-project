@@ -10,10 +10,11 @@ import Upload from './pages/Upload';
 import Profile from './pages/Profile';
 import Auth from './components/Auth';
 import { useEffect, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

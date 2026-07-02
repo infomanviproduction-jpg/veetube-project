@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
+interface Video {
+  id: string;
+  title: string;
+  thumbnail_url?: string;
+  user_email?: string;
+  views?: number;
+  created_at?: string;
+}
+
 const categories = ['All', 'Music', 'Gaming', 'News', 'Live', 'Cooking', 'React', 'Python', 'Sports'];
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [videos, setVideos] = useState<any[]>([]);
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -29,18 +38,20 @@ export default function Home() {
     await supabase.rpc('increment_views', { video_id: id });
   };
 
-  const handleVideoClick = async (video: any) => {
+  const handleVideoClick = async (video: Video) => {
     await incrementViews(video.id);
     navigate(`/watch/${video.id}`);
   };
 
-  const formatViews = (views: number) => {
+  const formatViews = (views?: number) => {
+    if (!views) return '0';
     if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
     if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-    return views?.toString() || '0';
+    return views.toString();
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date?: string) => {
+    if (!date) return '';
     const diff = Date.now() - new Date(date).getTime();
     const days = Math.floor(diff / 86400000);
     if (days === 0) return 'Aaj';

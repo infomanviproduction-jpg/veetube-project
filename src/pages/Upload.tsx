@@ -66,8 +66,8 @@ export default function Upload() {
       setVideoFile(null)
       setThumbnailFile(null)
 
-    } catch (err: any) {
-      setMessage('❌ Error: ' + err.message)
+    } catch (err) {
+      setMessage('❌ Error: ' + (err instanceof Error ? err.message : String(err)))
     }
 
     setUploading(false)

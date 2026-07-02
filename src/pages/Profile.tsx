@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from '../supabase'
 
+type SupabaseUser = Pick<User, 'email' | 'id' | 'created_at' | 'user_metadata'> & {
+  user_metadata?: { full_name?: string }
+}
+
 export default function Profile() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export default function Profile() {
           <div className="bg-gray-800 rounded-xl p-4">
             <p className="text-gray-400 text-sm">Joined</p>
             <p className="text-white font-bold">
-              {new Date(user?.created_at).toLocaleDateString('hi-IN')}
+              {user?.created_at ? new Date(user.created_at).toLocaleDateString('hi-IN') : 'N/A'}
             </p>
           </div>
           <div className="bg-gray-800 rounded-xl p-4">
