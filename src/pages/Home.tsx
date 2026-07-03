@@ -2,20 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
 
-interface Video {
-  id: string;
-  title: string;
-  thumbnail_url?: string;
-  user_email?: string;
-  views?: number;
-  created_at?: string;
-}
-
 const categories = ['All', 'Music', 'Gaming', 'News', 'Live', 'Cooking', 'React', 'Python', 'Sports'];
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -29,42 +20,33 @@ export default function Home() {
       .from('videos')
       .select('*')
       .order('created_at', { ascending: false });
-
     if (!error && data) setVideos(data);
     setLoading(false);
   };
 
-  const incrementViews = async (id: string) => {
-    await supabase.rpc('increment_views', { video_id: id });
-  };
-
-  const handleVideoClick = async (video: Video) => {
-    await incrementViews(video.id);
+  const handleVideoClick = async (video: any) => {
+    await supabase.rpc('increment_views', { video_id: video.id });
     navigate(`/watch/${video.id}`);
   };
 
-  const formatViews = (views?: number) => {
-    if (!views) return '0';
+  const formatViews = (views: number) => {
     if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
     if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-    return views.toString();
+    return views?.toString() || '0';
   };
 
-  const formatDate = (date?: string) => {
-    if (!date) return '';
+  const formatDate = (date: string) => {
     const diff = Date.now() - new Date(date).getTime();
     const days = Math.floor(diff / 86400000);
-    if (days === 0) return 'Aaj';
-    if (days === 1) return 'Kal';
-    if (days < 30) return `${days} din pehle`;
-    if (days < 365) return `${Math.floor(days / 30)} mahine pehle`;
-    return `${Math.floor(days / 365)} saal pehle`;
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 30) return `${days} days ago`;
+    if (days < 365) return `${Math.floor(days / 30)} months ago`;
+    return `${Math.floor(days / 365)} years ago`;
   };
 
   return (
     <div className="min-h-screen bg-black">
-      
-      {/* Categories */}
       <div className="sticky top-14 z-40 bg-black px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide border-b border-gray-800">
         {categories.map((cat) => (
           <button
@@ -81,16 +63,14 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Videos Grid */}
       <div className="p-4">
         {loading ? (
           <div className="flex items-center justify-center h-64">
-            <p className="text-white text-xl">Videos load ho rahi hain...</p>
+            <p className="text-white text-xl">Loading...</p>
           </div>
         ) : videos.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64">
-            <p className="text-gray-400 text-xl mb-2">Abhi koi video nahi hai</p>
-            <p className="text-gray-600">Upload karo pehli video!</p>
+            <p className="text-gray-400 text-xl">No videos yet</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -100,7 +80,6 @@ export default function Home() {
                 onClick={() => handleVideoClick(video)}
                 className="cursor-pointer group"
               >
-                {/* Thumbnail */}
                 <div className="relative aspect-video bg-gray-800 rounded-xl overflow-hidden mb-3">
                   {video.thumbnail_url ? (
                     <img
@@ -115,18 +94,23 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Video Info */}
                 <div className="flex gap-3">
-                  {/* Avatar */}
-                  <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white font-bold shrink-0">
+                  <div
+                    onClick={(e) => { e.stopPropagation(); navigate(`/channel/${video.user_id}`) }}
+                    className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white font-bold shrink-0 cursor-pointer"
+                  >
                     {video.user_email?.charAt(0).toUpperCase()}
                   </div>
-
                   <div>
                     <h3 className="text-white font-medium line-clamp-2 text-sm leading-snug mb-1">
                       {video.title}
                     </h3>
-                    <p className="text-gray-400 text-xs">{video.user_email?.split('@')[0]}</p>
+                    <p
+                      onClick={(e) => { e.stopPropagation(); navigate(`/channel/${video.user_id}`) }}
+                      className="text-gray-400 text-xs cursor-pointer hover:text-white"
+                    >
+                      {video.channel_name || video.user_email?.split('@')[0]}
+                    </p>
                     <p className="text-gray-400 text-xs">
                       {formatViews(video.views)} views • {formatDate(video.created_at)}
                     </p>
