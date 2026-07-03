@@ -64,7 +64,7 @@ export default function Watch() {
   if (!video) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-black">
-        <p className="text-white text-xl">Video nahi mili!</p>
+        <p className="text-white text-xl">Video not found!</p>
       </div>
     )
   }
@@ -131,7 +131,7 @@ export default function Watch() {
             {formatDate(video.created_at)}
           </p>
           <p className="text-white text-sm">
-            {video.description || 'Koi description nahi hai.'}
+            {video.description || 'No description available.'}
           </p>
         </div>
 

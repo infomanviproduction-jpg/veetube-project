@@ -87,7 +87,7 @@ export default function Profile() {
           onClick={handleLogout}
           className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition"
         >
-          🚪 Logout
+          🚪 Sign Out
         </button>
 
       </div>
