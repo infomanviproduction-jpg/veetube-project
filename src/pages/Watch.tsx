@@ -11,6 +11,8 @@ export default function Watch() {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [user, setUser] = useState<any>(null);
+  const [subscribed, setSubscribed] = useState(false);
+  const [subCount, setSubCount] = useState(0);
 
   useEffect(() => {
     fetchVideo();
@@ -29,8 +31,54 @@ export default function Watch() {
       .select('*')
       .eq('id', id)
       .single();
-    if (data) setVideo(data);
+    if (data) {
+      setVideo(data);
+      fetchSubInfo(data.user_email);
+    }
     setLoading(false);
+  };
+
+  const fetchSubInfo = async (channelEmail: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    const { count } = await supabase
+      .from('subscriptions')
+      .select('*', { count: 'exact', head: true })
+      .eq('channel_email', channelEmail);
+    setSubCount(count || 0);
+
+    if (user) {
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('subscriber_id', user.id)
+        .eq('channel_email', channelEmail)
+        .single();
+      setSubscribed(!!data);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    if (!user || !video) return;
+
+    if (subscribed) {
+      await supabase
+        .from('subscriptions')
+        .delete()
+        .eq('subscriber_id', user.id)
+        .eq('channel_email', video.user_email);
+      setSubscribed(false);
+      setSubCount(subCount - 1);
+    } else {
+      await supabase
+        .from('subscriptions')
+        .insert({
+          subscriber_id: user.id,
+          channel_email: video.user_email,
+        });
+      setSubscribed(true);
+      setSubCount(subCount + 1);
+    }
   };
 
   const fetchComments = async () => {
@@ -117,11 +165,20 @@ export default function Watch() {
             </div>
             <div>
               <p className="text-white font-medium">{video.user_email?.split('@')[0]}</p>
-              <p className="text-gray-400 text-sm">{video.views} views</p>
+              <p className="text-gray-400 text-sm">{subCount} subscribers</p>
             </div>
-            <button className="ml-4 bg-white text-black px-4 py-1.5 rounded-full font-bold text-sm">
-              Subscribe
-            </button>
+            {user?.email !== video.user_email && (
+              <button
+                onClick={handleSubscribe}
+                className={`ml-4 px-4 py-1.5 rounded-full font-bold text-sm transition ${
+                  subscribed
+                    ? 'bg-gray-700 text-white'
+                    : 'bg-white text-black hover:bg-gray-200'
+                }`}
+              >
+                {subscribed ? 'Subscribed ✓' : 'Subscribe'}
+              </button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -155,7 +212,6 @@ export default function Watch() {
             💬 {comments.length} Comments
           </h3>
 
-          {/* Comment Input */}
           <div className="flex gap-3 mb-6">
             <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white font-bold shrink-0">
               {user?.email?.charAt(0).toUpperCase()}
@@ -178,7 +234,6 @@ export default function Watch() {
             </div>
           </div>
 
-          {/* Comments List */}
           <div className="space-y-4">
             {comments.length === 0 ? (
               <p className="text-gray-500 text-center py-4">No comments yet. Be the first!</p>
