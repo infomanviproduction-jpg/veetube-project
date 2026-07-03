@@ -153,7 +153,7 @@ export default function Navbar() {
                       onClick={() => setProfileOpen(false)}
                       className="text-xs text-blue-500 hover:underline"
                     >
-                      Channel dekho
+                      View your channel
                     </Link>
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export default function Navbar() {
                 <div className="py-1">
                   <Link to={`/channel/${user?.id}`} onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
-                    <span>👤</span> Aapka Channel
+                    <span>👤</span> Your Channel
                   </Link>
                   <Link to="/upload" onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
