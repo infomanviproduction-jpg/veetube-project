@@ -8,24 +8,49 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchVideos();
+    getUser();
   }, []);
+
+  useEffect(() => {
+    if (user !== undefined) fetchVideos();
+  }, [user]);
+
+  const getUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
 
   const fetchVideos = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+
+    let query = supabase
       .from('videos')
       .select('*')
       .order('created_at', { ascending: false });
+
+    if (user) {
+      // Show public videos + own private/unlisted videos
+      query = query.or(`visibility.eq.public,and(visibility.eq.private,user_id.eq.${user.id}),and(visibility.eq.unlisted,user_id.eq.${user.id})`);
+    } else {
+      // Show only public videos
+      query = query.eq('visibility', 'public');
+    }
+
+    const { data, error } = await query;
     if (!error && data) setVideos(data);
     setLoading(false);
   };
 
+  const incrementViews = async (id: string) => {
+    await supabase.rpc('increment_views', { video_id: id });
+  };
+
   const handleVideoClick = async (video: any) => {
-    await supabase.rpc('increment_views', { video_id: video.id });
+    await incrementViews(video.id);
     navigate(`/watch/${video.id}`);
   };
 
@@ -45,8 +70,18 @@ export default function Home() {
     return `${Math.floor(days / 365)} years ago`;
   };
 
+  const getVisibilityBadge = (video: any) => {
+    if (video.user_id === user?.id) {
+      if (video.visibility === 'private') return <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">Private</span>;
+      if (video.visibility === 'unlisted') return <span className="text-xs bg-yellow-500 text-white px-2 py-0.5 rounded-full">Unlisted</span>;
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-black">
+      
+      {/* Categories */}
       <div className="sticky top-14 z-40 bg-black px-4 py-3 flex gap-2 overflow-x-auto scrollbar-hide border-b border-gray-800">
         {categories.map((cat) => (
           <button
@@ -63,6 +98,7 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Videos Grid */}
       <div className="p-4">
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -70,7 +106,8 @@ export default function Home() {
           </div>
         ) : videos.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64">
-            <p className="text-gray-400 text-xl">No videos yet</p>
+            <p className="text-gray-400 text-xl mb-2">No videos yet</p>
+            <p className="text-gray-600">Upload your first video!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -80,6 +117,7 @@ export default function Home() {
                 onClick={() => handleVideoClick(video)}
                 className="cursor-pointer group"
               >
+                {/* Thumbnail */}
                 <div className="relative aspect-video bg-gray-800 rounded-xl overflow-hidden mb-3">
                   {video.thumbnail_url ? (
                     <img
@@ -92,25 +130,22 @@ export default function Home() {
                       <span className="text-gray-500 text-4xl">🎬</span>
                     </div>
                   )}
+                  {/* Visibility Badge */}
+                  <div className="absolute top-2 left-2">
+                    {getVisibilityBadge(video)}
+                  </div>
                 </div>
 
+                {/* Video Info */}
                 <div className="flex gap-3">
-                  <div
-                    onClick={(e) => { e.stopPropagation(); navigate(`/channel/${video.user_id}`) }}
-                    className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white font-bold shrink-0 cursor-pointer"
-                  >
+                  <div className="w-9 h-9 rounded-full bg-red-500 flex items-center justify-center text-white font-bold shrink-0">
                     {video.user_email?.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h3 className="text-white font-medium line-clamp-2 text-sm leading-snug mb-1">
                       {video.title}
                     </h3>
-                    <p
-                      onClick={(e) => { e.stopPropagation(); navigate(`/channel/${video.user_id}`) }}
-                      className="text-gray-400 text-xs cursor-pointer hover:text-white"
-                    >
-                      {video.channel_name || video.user_email?.split('@')[0]}
-                    </p>
+                    <p className="text-gray-400 text-xs">{video.user_email?.split('@')[0]}</p>
                     <p className="text-gray-400 text-xs">
                       {formatViews(video.views)} views • {formatDate(video.created_at)}
                     </p>
