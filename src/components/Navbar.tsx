@@ -163,9 +163,17 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
                     <span>👤</span> Your Channel
                   </Link>
+                  <Link to="/studio" onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
+                    <span>🎬</span> VeeTube Studio
+                  </Link>
                   <Link to="/upload" onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
-                    <span>🎬</span> Video Upload
+                    <span>📤</span> Upload Video
+                  </Link>
+                  <Link to="/analytics" onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
+                    <span>📊</span> Analytics
                   </Link>
                   <Link to="/profile" onClick={() => setProfileOpen(false)}
                     className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white transition">
