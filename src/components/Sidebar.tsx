@@ -18,6 +18,8 @@ import {
   HelpCircle,
   Flag,
   X,
+  BarChart2,
+  Upload,
 } from 'lucide-react';
 import { useUI } from '../context/UIContext';
 
@@ -31,6 +33,8 @@ const mainItems: NavItem[] = [
   { label: 'Home', icon: Home, to: '/' },
   { label: 'Shorts', icon: Clapperboard, to: '/shorts' },
   { label: 'Subscriptions', icon: ListVideo, to: '/subscriptions' },
+  { label: 'Upload', icon: Upload, to: '/upload' },
+  { label: 'Analytics', icon: BarChart2, to: '/analytics' },
 ];
 
 const libraryItems: NavItem[] = [
@@ -101,7 +105,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             <span key={l} className="hover:text-yt-text dark:hover:text-yt-text-dark cursor-pointer">{l}</span>
           ))}
         </div>
-        <div className="pt-2 text-yt-text-secondary dark:text-yt-text-secondary-dark">© 2024 VeeTube</div>
+        <div className="pt-2 text-yt-text-secondary dark:text-yt-text-secondary-dark">© 2025 VeeTube</div>
       </div>
     </nav>
   );
@@ -112,7 +116,8 @@ function MiniSidebar() {
   const items = [
     { label: 'Home', icon: Home, to: '/' },
     { label: 'Shorts', icon: Clapperboard, to: '/shorts' },
-    { label: 'Subscriptions', icon: ListVideo, to: '/subscriptions' },
+    { label: 'Upload', icon: Upload, to: '/upload' },
+    { label: 'Analytics', icon: BarChart2, to: '/analytics' },
     { label: 'You', icon: Library, to: '/profile' },
   ];
   return (
@@ -141,7 +146,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Desktop full sidebar */}
       {sidebarOpen ? (
         <aside className="hidden lg:block fixed left-0 top-14 bottom-0 w-60 bg-yt-bg dark:bg-yt-bg-dark overflow-y-auto scrollbar-thin">
           <SidebarContent />
@@ -150,7 +154,6 @@ export default function Sidebar() {
         <MiniSidebar />
       )}
 
-      {/* Mobile drawer */}
       {mobileSidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div

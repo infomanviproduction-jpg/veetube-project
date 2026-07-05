@@ -8,6 +8,7 @@ import Search from './pages/Search'
 import Channel from './pages/Channel'
 import Upload from './pages/Upload'
 import Profile from './pages/Profile'
+import Analytics from './pages/Analytics'
 import Auth from './components/Auth'
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
@@ -51,6 +52,7 @@ export default function App() {
               <Route path="/channel/:id" element={<Channel />} />
               <Route path="/upload" element={user ? <Upload /> : <Auth />} />
               <Route path="/profile" element={user ? <Profile /> : <Auth />} />
+              <Route path="/analytics" element={user ? <Analytics /> : <Auth />} />
               <Route path="/login" element={<Auth />} />
               <Route path="*" element={<Home />} />
             </Route>
