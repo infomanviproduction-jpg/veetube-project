@@ -59,3 +59,8 @@ export default function App() {
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
+        </BrowserRouter>
+      </UIProvider>
+    </ThemeProvider>
+  )
+}
