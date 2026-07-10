@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { ThumbsUp, Share2, Download, Send, Trash2 } from 'lucide-react';
+import { ThumbsUp, Share2, Download, Send, Trash2, X, Copy, Check } from 'lucide-react';
 
 export default function Watch() {
   const { id } = useParams();
@@ -13,12 +13,21 @@ export default function Watch() {
   const [user, setUser] = useState<any>(null);
   const [subscribed, setSubscribed] = useState(false);
   const [subCount, setSubCount] = useState(0);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
   useEffect(() => {
     fetchVideo();
     fetchComments();
     getUser();
   }, [id]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShareUrl(window.location.href);
+    }
+  }, [showShareModal]);
 
   const getUser = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -98,6 +107,37 @@ export default function Watch() {
       .update({ likes: (video.likes || 0) + 1 })
       .eq('id', id);
     setVideo({ ...video, likes: (video.likes || 0) + 1 });
+  };
+
+  const handleShare = () => {
+    setCopied(false);
+    if (typeof window !== 'undefined') {
+      setShareUrl(window.location.href);
+    }
+    setShowShareModal(true);
+  };
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      return;
+    } catch (err) {
+      // clipboard API blocked hai, manual select+copy try karo
+    }
+
+    const input = document.getElementById('share-link-input') as HTMLInputElement;
+    if (input) {
+      input.focus();
+      input.select();
+      if (document.execCommand('copy')) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    }
   };
 
   const handleComment = async () => {
@@ -188,7 +228,10 @@ export default function Watch() {
             >
               <ThumbsUp className="w-4 h-4" /> {video.likes || 0}
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800 text-white text-sm">
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-800 text-white text-sm"
+            >
               <Share2 className="w-4 h-4" /> Share
             </button>
             <button
@@ -271,6 +314,46 @@ export default function Watch() {
         </div>
 
       </div>
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowShareModal(false)}
+        >
+          <div
+            className="bg-gray-900 rounded-xl p-6 max-w-md w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-white font-bold text-lg">Video Share Karo</h3>
+              <button onClick={() => setShowShareModal(false)} className="text-gray-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex gap-2 mb-3">
+              <input
+                id="share-link-input"
+                type="text"
+                readOnly
+                value={shareUrl}
+                onFocus={(e) => e.target.select()}
+                className="flex-1 bg-gray-800 text-white text-sm rounded-lg px-3 py-2 outline-none"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 rounded-lg flex items-center gap-1 text-sm shrink-0"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <p className="text-gray-500 text-xs">
+              Agar Copy button kaam na kare, to upar wale box ke andar click karke Ctrl+C daba do.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

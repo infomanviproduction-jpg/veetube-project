@@ -10,6 +10,7 @@ import Upload from './pages/Upload'
 import Profile from './pages/Profile'
 import Analytics from './pages/Analytics'
 import Studio from './pages/Studio'
+import Notifications from './pages/Notifications'
 import Auth from './components/Auth'
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
@@ -53,12 +54,8 @@ export default function App() {
               <Route path="/profile" element={user ? <Profile /> : <Auth />} />
               <Route path="/analytics" element={user ? <Analytics /> : <Auth />} />
               <Route path="/studio" element={user ? <Studio /> : <Auth />} />
+              <Route path="/notifications" element={user ? <Notifications /> : <Auth />} />
               <Route path="/login" element={<Auth />} />
               <Route path="*" element={<Home />} />
             </Route>
           </Routes>
-        </BrowserRouter>
-      </UIProvider>
-    </ThemeProvider>
-  )
-}
